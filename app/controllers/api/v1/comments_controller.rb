@@ -1,57 +1,73 @@
 class Api::V1::CommentsController < ApplicationController
+  before_action :find_article, only: [:show, :update, :destroy, :edit, :create, :index]
+  before_action :find_comment, only: [:show, :update, :destroy]
 
-before_action :find_comment, only: [:show, :update, :destroy]
-
-def index
-	@comments = Comment.all
-	render json: @comments
-end
-
-def show
-	render json: @comment 
-end
-
-def create
-  @comment = Comment.new(comment_params)
-  if @comment.save!
-    render json: @comment, status: :created
-  else
-    render json: @comment.errors, status: :unprocessable_entity
+  def index
+    if @article
+      @comments = @article.comments
+      render json:@comments
+    else
+      render json: { error: "Couldn't find article with provide id" }
+    end
   end
-end
-	
 
-def update
-  if @comment.update(comment_params)
-    render json: @comment
-  else
-    render json: @comment.errors, status: :unprocessable_entity
+  def create  
+    if @article    
+      @comment = @article.comments.new(comment_params)
+    if @comment.save
+      render json:@comment
+    end
+
+    else
+      render json: { error: "Couldn't find article" }
+    end
   end
-end
 
-def destroy
-	@comment.destroy 
-	render json: { status: 'SUCCESS', message: 'Deleted comment' }, status: :ok
-end
+  def show
+    if @comment
+      render json:@comment
+    else
+    render json: { error: "Couldn't find comment " }
+    end
+  end
 
-def search
-  @comment = Comment.find_by(comment: params[:comment])
-	if @comment
-	@comments = Comment.where("comment=?", @comment.comment)
-		render json: @comments
-	else
-		render json: { message: "Comment not found" }, status: 400
-	end
-end
+  def update
+    if @comment
+      @comment.update(comment_params)
+      render json: { error: " comment is successfully updated " }
+    else
+      render json: { error: "Couldn't find comment " }
+    end
+  end
 
-private
+  def destroy
+    if @comment
+      @comment.destroy
+      render json: { message: "Successfully deleted comment " }
+    else
+      render json: { error: "Couldn't find comment "}
+    end
+  end
 
-def find_comment
-	@comment = Comment.find_by(id: params[:id])
-end
+  def search
+    @comments = Comment.where("comment LIKE '%#{params[:comment]}%'")		
+    if @comments
+      render json: @comments
+    else
+      render json: { message: "Unable to find comments!" }, status: 400
+    end
+  end
 
-def comment_params
-  params.require(:comment).permit(:comment, :date_of_comment, :article_id)
-end
+  private
+  def comment_params
+      params.require(:comment).permit(:comment, :date_of_comment)
+  end
 
+  def find_comment
+      @comment = @article.comments.find(params[:id])
+  end
+
+  def find_article
+    @article = Article.find(params[:article_id])
+  end
 end
