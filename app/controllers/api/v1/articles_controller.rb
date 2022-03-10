@@ -5,7 +5,7 @@ class Api::V1::ArticlesController < ApplicationController
     @articles = Article.all
     render json:@articles
   end
-  
+
 	def show
     if @article
       render json:@article
@@ -46,12 +46,12 @@ class Api::V1::ArticlesController < ApplicationController
   end
 
   def search
-			@articles = Article.where("title LIKE '%#{params[:title]}%'")			
-			if @articles
-				render json: @articles
-		  else
-		  	render json: { message: "Unable to find article! " }, status: 400
-	  	end
+		@articles = Article.where("title LIKE '%#{params[:title]}%'")			
+		if @articles
+		  render json: @articles
+		else
+		  render json: { message: "Unable to find article! " }, status: 400
+	  end
 	end
 
   private

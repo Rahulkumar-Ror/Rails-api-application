@@ -60,11 +60,11 @@ class Api::V1::CommentsController < ApplicationController
 
   private
   def comment_params
-      params.require(:comment).permit(:comment, :date_of_comment)
+    params.require(:comment).permit(:comment, :date_of_comment)
   end
 
   def find_comment
-      @comment = @article.comments.find(params[:id])
+    @comment = @article.comments.find(params[:id])
   end
 
   def find_article
